@@ -1,7 +1,8 @@
 from src.apartment import Apartment
 from src.community_type import CommunityType
 from src.community_factory import CommunityFactory
-import csv
+from src.database import Database
+import time
 
 community_list = [
   (CommunityType.IRVINE, "River View", "https://www.irvinecompanyapartments.com/locations/northern-california/san-jose/river-view/availability.html"),
@@ -11,11 +12,20 @@ community_list = [
   (CommunityType.IRVINE, "Monticello", "https://www.irvinecompanyapartments.com/locations/northern-california/santa-clara/monticello/availability.html"),
 ]
 
-with open("apartments.csv", 'w') as csvfile:
-  writer = csv.DictWriter(csvfile, fieldnames=Apartment.fieldnames())
-  writer.writeheader()
-  for type, name, url in community_list:
-    community = CommunityFactory.getCommunity(type, name, url)
-    apt_list = community.fetch_apartments() 
-    for apt in apt_list:
-      writer.writerow(apt.todict())
+while True:
+  conn = Database.get_connection()
+  try:
+    for type, name, url in community_list:
+      community = CommunityFactory.getCommunity(type, name, url)
+      apt_list = community.fetch_apartments() 
+      for apt in apt_list:
+        apt.save(conn)
+    conn.commit()
+  except Exception:
+    if conn is not None:
+      conn.rollback()
+    print(Exception)
+  finally:
+    if conn is not None:
+      conn.close()
+    time.sleep(60*60)

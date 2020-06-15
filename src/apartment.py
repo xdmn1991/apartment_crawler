@@ -7,11 +7,12 @@ class Apartment:
   rent = None
   term = None
   availability = None
+  crawling_time = None
   other = None
 
   @staticmethod
   def fieldnames():
-    return ["community", "apartment", "bed", "bath", "sqft", "rent", "term", "availability", "other"]
+    return ["community", "apartment", "bed", "bath", "sqft", "rent", "term", "availability", "other", "crawling_time"]
 
   def __init__(self, comunity, apt_name):
     self.comunity = comunity
@@ -21,7 +22,7 @@ class Apartment:
     return "comunity={}, apt_name={}, bed_num={}, bath_num={}, sqft={}, rent={}, term={}, availability={}, other={}".format(self.comunity, self.apt_name, self.bed_num, self.bath_num, self.sqft, self.rent, self.term, self.availability, self.other)
   
   def valuelist(self):
-    return [self.comunity, self.apt_name, self.bed_num, self.bath_num, self.sqft, self.rent, self.term, self.availability, self.other]
+    return [self.comunity, self.apt_name, self.bed_num, self.bath_num, self.sqft, self.rent, self.term, self.availability, self.other, self.crawling_time]
   
   def todict(self):
     values = self.valuelist()
@@ -30,3 +31,12 @@ class Apartment:
     for i, field in enumerate(field_names):
       d[field] = values[i]
     return d
+  
+  def save(self, conn):
+    cur = conn.cursor()
+    cur.execute("""INSERT INTO rent_detail 
+                        (community, apartment, sqft, bed_num, bath_num, rent, availability, crawling_time, other)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                  (self.comunity, self.apt_name, self.sqft, self.bed_num, self.bath_num, self.rent, self.availability, self.crawling_time, ", ".join(self.other))
+                )
+    cur.close()

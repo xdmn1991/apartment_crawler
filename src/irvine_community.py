@@ -5,6 +5,29 @@ from selenium.webdriver.support import expected_conditions as EC
 from .apartment import Apartment
 import time
 import re
+import datetime
+
+month_dict = {
+  "jan": 1,
+  "feb": 2,
+  "mar": 3,
+  "apr": 4,
+  "may": 5,
+  "jun": 6,
+  "jul": 7,
+  "aug": 8,
+  "sep": 9,
+  "oct": 10,
+  "nov": 11,
+  "dev": 12,
+}
+
+def month(month_str):
+  s = month_str.lower()
+  if s in month_dict:
+    return month_dict[s]
+  return None
+
 
 class IrvineCommunity:
   def __init__(self, apartment_name, url):
@@ -12,6 +35,8 @@ class IrvineCommunity:
     self.apartment_name = apartment_name
 
   def fetch_apartments(self):
+    timestamp = datetime.datetime.now()
+    today = datetime.date.today()
     driver = webdriver.Chrome()
     try :
       driver.get(self.url)
@@ -31,26 +56,33 @@ class IrvineCommunity:
             continue
           parts = item.text.split('\n')
           apt = Apartment(self.apartment_name, parts[0])
+          apt.crawling_time = timestamp
           apt_list.append(apt)
 
           for i in range(1, len(parts)):
             part = parts[i]
             m = size_pattern.search(part);
             if m is not None:
-              apt.bed_num = m.group(1)
-              apt.bath_num = m.group(2)
-              apt.sqft = m.group(3)
+              apt.bed_num = float(m.group(1)) if m.group(1) else None
+              apt.bath_num = float(m.group(2)) if m.group(2) else None
+              apt.sqft = int(m.group(3).replace(",", ""))
               continue
             
             m = rent_pattern.search(part)
             if m is not None:
-              apt.rent = m.group(1)
+              apt.rent = int(m.group(1).replace(",", ""))
               apt.term = m.group(2)
               continue
             
             m = availability.search(part)
             if m is not None:
-              apt.availability = m.group(1)
+              val = m.group(1)
+              if val.lower() == "now":
+                apt.availability = today
+              else:
+                m = re.compile("(.*) (\d+)").search(val)
+                if m is not None:
+                  apt.availability = datetime.date(today.year, month(m.group(1)), int(m.group(2)))
               continue
             
             if apt.other is None:
@@ -64,7 +96,5 @@ class IrvineCommunity:
 
         retry_count += 1
         time.sleep(1)
-    except Exception:
-      return []
     finally:
       driver.quit()
