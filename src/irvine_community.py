@@ -34,10 +34,15 @@ class IrvineCommunity:
     self.url = url
     self.apartment_name = apartment_name
 
+
+  def __repr__(self):
+    return "Irvine Community {}".format(self.apartment_name)
+
+
   def fetch_apartments(self):
     timestamp = datetime.datetime.now()
     today = datetime.date.today()
-    driver = webdriver.Chrome()
+    driver = webdriver.Firefox()
     try :
       driver.get(self.url)
       driver.implicitly_wait(30) # seconds

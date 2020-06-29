@@ -1,6 +1,6 @@
 import psycopg2
 
-CONNECT_STRING = "dbname=rent_detail user=yi"
+CONNECT_STRING = "dbname=rent"
 
 class Database:
   @staticmethod

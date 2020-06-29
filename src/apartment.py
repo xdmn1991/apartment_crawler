@@ -37,6 +37,6 @@ class Apartment:
     cur.execute("""INSERT INTO rent_detail 
                         (community, apartment, sqft, bed_num, bath_num, rent, availability, crawling_time, other)
                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-                  (self.comunity, self.apt_name, self.sqft, self.bed_num, self.bath_num, self.rent, self.availability, self.crawling_time, ", ".join(self.other))
+                  (self.comunity, self.apt_name, self.sqft, self.bed_num, self.bath_num, self.rent, self.availability, self.crawling_time, ", ".join(self.other) if self.other is not None else None)
                 )
     cur.close()

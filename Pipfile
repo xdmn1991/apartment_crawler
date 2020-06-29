@@ -8,8 +8,7 @@ verify_ssl = true
 [packages]
 requests = "*"
 selenium = "*"
-psycopg2 = "*"
 psycopg2-binary = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.8"
